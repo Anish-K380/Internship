@@ -1,4 +1,4 @@
-import { NodeManager } from "./NodesEdges.js";
+import { NodeManager } from "./Nodes.js";
 
 export function makeNodes(data) {
     const nManager = new NodeManager();

@@ -1,4 +1,4 @@
-const companyData = {
+export const companyData = {
   company: {
     id: "acme",
     name: "Acme Support"

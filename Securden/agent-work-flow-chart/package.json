@@ -1,0 +1,18 @@
+{
+  "name": "agent-work-flow-chart",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "type": "module",
+  "dependencies": {
+    "cytoscape": "^3.34.2",
+    "d3": "^7.9.0",
+    "d3-selection": "^3.0.0",
+    "d3-shape": "^3.2.0",
+    "d3-zoom": "^3.0.0"
+  }
+}
