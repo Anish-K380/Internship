@@ -250,7 +250,8 @@ export function renderGraph(graphData, selector) {
 		  `${panelConfig.padding}px`
               )
               .style('height', 'auto')
-              .style('overflow', 'visible');
+              .style('overflow-y', 'auto')
+	      .style('overflow-x', 'hidden')
 
 	panel.on('click', event => {
 	    event.stopPropogation();
@@ -384,22 +385,15 @@ export function renderGraph(graphData, selector) {
 	if (clickPanelFullscreen) {
             const containerNode = container.node();
 
-            const containerWidth =
-		  containerNode.clientWidth;
+            const containerWidth = containerNode.clientWidth;
 
-            const containerHeight =
-		  containerNode.clientHeight;
+            const containerHeight = containerNode.clientHeight;
 
-            const scale =
-		  1 / currentTransform.k;
+            const scale = 1 / currentTransform.k;
 
-            const x =
-		  -currentTransform.x /
-		  currentTransform.k;
+            const x = -currentTransform.x / currentTransform.k;
 
-            const y =
-		  -currentTransform.y /
-		  currentTransform.k;
+            const y = -currentTransform.y / currentTransform.k;
 
             clickPanel
 		.attr('width', containerWidth)
@@ -411,7 +405,9 @@ export function renderGraph(graphData, selector) {
 
             panelElement
 		.style('width', `${containerWidth}px`)
-		.style('height', `${containerHeight}px`);
+		.style('height', `${containerHeight}px`)
+		.style('overflow-y', 'auto')
+		.style('overflow-x', 'hidden');
 	} else {
             clickPanel
 		.attr(
@@ -425,7 +421,9 @@ export function renderGraph(graphData, selector) {
                     'width',
                     `${displayConfig.style.panel.click.width}px`
 		)
-		.style('height', 'auto');
+		.style('height', 'auto')
+		.style('overflow-x', 'visible')
+		.style('overflow-y', 'visible');
 
             positionPanel(
 		clickPanel,
