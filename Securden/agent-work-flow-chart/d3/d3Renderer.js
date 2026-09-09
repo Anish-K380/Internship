@@ -31,17 +31,17 @@ export function renderGraph(graphData, selector) {
     // --------------------------------------------------
 
     svg.append('defs')
-        .append('marker')
-        .attr('id', 'arrow')
-        .attr('viewBox', '0 -5 10 10')
-        .attr('refX', 10)
-        .attr('refY', 0)
-        .attr('markerWidth', 5)
-        .attr('markerHeight', 5)
-        .attr('orient', 'auto')
-        .append('path')
-        .attr('d', 'M0,-4L8,0L0,5')
-        .attr('fill', '#94a3b8');
+	.append('marker')
+	.attr('id', 'arrow')
+	.attr('viewBox', '0 -5 10 10')
+	.attr('refX', 10)
+	.attr('refY', 0)
+	.attr('markerWidth', 5)
+	.attr('markerHeight', 5)
+	.attr('orient', 'auto')
+	.append('path')
+	.attr('d', 'M0,-4L8,0L0,4')
+	.attr('fill', '#64748b');
 
     // --------------------------------------------------
     // Main viewport
@@ -73,6 +73,8 @@ export function renderGraph(graphData, selector) {
         .attr('stroke', edgeStyle.stroke)
         .attr('stroke-width', edgeStyle.strokeWidth)
         .attr('opacity', edgeStyle.opacity)
+	.attr('stroke-linecap', 'round')
+	.attr('stroke-linejoin', 'round')
         .attr('marker-end', 'url(#arrow)');
 
     // --------------------------------------------------
@@ -95,7 +97,6 @@ export function renderGraph(graphData, selector) {
     // Panels / selection state
     // --------------------------------------------------
 
-    let hoverPanel = null;
     let selectedNode = null;
     let clickPanel = null;
     let hoveredNode = null;
@@ -348,13 +349,6 @@ export function renderGraph(graphData, selector) {
 	}
     }
 
-    function removeHoverPanel() {
-        if (hoverPanel) {
-            hoverPanel.remove();
-            hoverPanel = null;
-        }
-    }
-
     function removeClickPanel() {
         if (clickPanel) {
             clickPanel.remove();
@@ -385,9 +379,9 @@ export function renderGraph(graphData, selector) {
 
 	clickPanelFullscreen = !clickPanelFullscreen;
 
-	if (clickPanelFullscreen) {
-            const scale = 1 / currentTransform.k;
+	const panelElement = clickPanel.select('div');
 
+	if (clickPanelFullscreen) {
             const containerNode = container.node();
 
             const containerWidth =
@@ -396,43 +390,42 @@ export function renderGraph(graphData, selector) {
             const containerHeight =
 		  containerNode.clientHeight;
 
-            const fullscreenWidth =
-		  containerWidth * currentTransform.k;
-
-            const fullscreenHeight =
-		  containerHeight * currentTransform.k;
+            const scale =
+		  1 / currentTransform.k;
 
             const x =
-		  -currentTransform.x / currentTransform.k;
+		  -currentTransform.x /
+		  currentTransform.k;
 
             const y =
-		  -currentTransform.y / currentTransform.k;
+		  -currentTransform.y /
+		  currentTransform.k;
 
             clickPanel
-		.attr('width', fullscreenWidth)
-		.attr('height', fullscreenHeight)
-		.select('div')
-		.style(
-                    'width',
-                    `${fullscreenWidth}px`
+		.attr('width', containerWidth)
+		.attr('height', containerHeight)
+		.attr(
+                    'transform',
+                    `translate(${x}, ${y}) scale(${scale})`
 		);
 
-            clickPanel.attr(
-		'transform',
-		`translate(${x}, ${y}) scale(${scale})`
-            );
+            panelElement
+		.style('width', `${containerWidth}px`)
+		.style('height', `${containerHeight}px`);
 	} else {
             clickPanel
 		.attr(
                     'width',
                     displayConfig.style.panel.click.width
 		)
-		.attr('height', 1)
-		.select('div')
+		.attr('height', 1);
+
+            panelElement
 		.style(
                     'width',
                     `${displayConfig.style.panel.click.width}px`
-		);
+		)
+		.style('height', 'auto');
 
             positionPanel(
 		clickPanel,
@@ -493,66 +486,44 @@ export function renderGraph(graphData, selector) {
     // --------------------------------------------------
 
     nodeGroup
-        .on('mouseenter', function(event, node) {
-            hoveredNode = node;
+	.on('mouseenter', function(event, node) {
+	    hoveredNode = node;
 
-            const group = select(this);
+	    const group = select(this);
 
-            const hoverStyle = displayConfig.style.node.hover;
+	    const hoverStyle =
+		  displayConfig.style.node.hover;
 
-            group
-                .selectAll('rect, ellipse')
-                .attr('fill', hoverStyle.fill)
-                .attr('stroke', hoverStyle.stroke)
-                .attr('stroke-width',hoverStyle.strokeWidth);
+	    group
+		.selectAll('rect, ellipse')
+		.attr('fill', hoverStyle.fill)
+		.attr('stroke', hoverStyle.stroke)
+		.attr('stroke-width', hoverStyle.strokeWidth)
+		.attr('filter', 'drop-shadow(0 0 6px rgba(37, 99, 235, 0.45))');
+	})
 
-            removeHoverPanel();
+	.on('mouseleave', function(event, node) {
+	    const group = select(this);
 
-            // removeHoverPanel() clears hoveredNode,
-            // so restore it here.
-            hoverPanel = createPanel(
-                node,
-                displayConfig.node.hover.fields,
-                'hover-panel',
-                displayConfig.style.panel.hover
-            );
+	    if (selectedNode !== node) {
+		const normalStyle =
+		      displayConfig.style.node.normal;
 
-            positionPanel(
-                hoverPanel,
-                node,
-                displayConfig.style.panel.hover
-            );
-        })
-
-        .on('mouseleave', function(event, node) {
-            const group = select(this);
-
-            if (selectedNode !== node) {
-                const normalStyle =
-                    displayConfig.style.node.normal;
-
-                group
-                    .selectAll('rect, ellipse')
-                    .attr(
-                        'fill',
-                        normalStyle.fill
-                    )
-                    .attr(
-                        'stroke',
-                        normalStyle.stroke
-                    )
-                    .attr(
-                        'stroke-width',
-                        normalStyle.strokeWidth
-                    );
-            }
+		group
+		    .selectAll('rect, ellipse')
+		    .attr('fill', normalStyle.fill)
+		    .attr('stroke', normalStyle.stroke)
+		    .attr(
+			'stroke-width',
+			normalStyle.strokeWidth
+		    )
+		    .attr('filter', null);
+	    }
 
 	    if (hoveredNode === node) {
 		hoveredNode = null;
-		removeHoverPanel();
 	    }
-
-        })
+	})
 
         .on('click', function(event, node) {
             event.stopPropagation();
@@ -607,18 +578,10 @@ export function renderGraph(graphData, selector) {
 
             select(this)
                 .selectAll('rect, ellipse')
-                .attr(
-                    'fill',
-                    selectedStyle.fill
-                )
-                .attr(
-                    'stroke',
-                    selectedStyle.stroke
-                )
-                .attr(
-                    'stroke-width',
-                    selectedStyle.strokeWidth
-                );
+                .attr('fill', selectedStyle.fill)
+                .attr('stroke', selectedStyle.stroke)
+                .attr('stroke-width', selectedStyle.strokeWidth)
+		.attr('filter', 'drop-shadow(0 0 8px rgba(124, 58, 237, 0.45))');
 
             // --------------------------------------------------
             // Create click panel
@@ -651,50 +614,46 @@ export function renderGraph(graphData, selector) {
     // --------------------------------------------------
 
     const zoomBehavior = zoom()
-        .scaleExtent([0.1, 5])
-        .on('zoom', event => {
-            currentTransform = event.transform;
+	  .scaleExtent([0.1, 5])
+	  .on('zoom', event => {
+              currentTransform = event.transform;
 
-            viewport.attr(
-                'transform',
-                event.transform
-            );
+              viewport.attr(
+		  'transform',
+		  event.transform
+              );
 
-            if (hoverPanel && hoveredNode) {
-                positionPanel(
-                    hoverPanel,
-                    hoveredNode,
-                    displayConfig.style.panel.hover
-                );
-            }
+              if (!clickPanel || !selectedNode) {
+		  return;
+              }
 
-	    if (clickPanel && selectedNode) {
-		if (clickPanelFullscreen) {
-		    const scale = 1 / currentTransform.k;
+              if (clickPanelFullscreen) {
+		  const scale =
+			1 / currentTransform.k;
 
-		    const x =
-			  -currentTransform.x / currentTransform.k;
+		  const x =
+			-currentTransform.x /
+			currentTransform.k;
 
-		    const y =
-			  -currentTransform.y / currentTransform.k;
+		  const y =
+			-currentTransform.y /
+			currentTransform.k;
 
-		    clickPanel.attr(
-			'transform',
-			`translate(${x}, ${y}) scale(${scale})`
-		    );
-
-		} else {
-		    positionPanel(
-			clickPanel,
-			selectedNode,
-			displayConfig.style.panel.click
-		    );
-		}
-	    }
-        });
+		  clickPanel.attr(
+                      'transform',
+                      `translate(${x}, ${y}) scale(${scale})`
+		  );
+              } else {
+		  positionPanel(
+                      clickPanel,
+                      selectedNode,
+                      displayConfig.style.panel.click
+		  );
+              }
+	  });
 
     svg.call(zoomBehavior);
-
+    
     // --------------------------------------------------
     // Initial fit
     // --------------------------------------------------

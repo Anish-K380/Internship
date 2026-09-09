@@ -1,12 +1,12 @@
 export const displayConfig = {
     node: {
         normal: {
-            fields: ['label'],
+            fields: ['label', 'id'],
             style: 'normal'
         },
 
         hover: {
-            fields: ['label', 'type', 'id'],
+            fields: [],
             style: 'hover'
         },
 
@@ -17,34 +17,34 @@ export const displayConfig = {
     },
 
     style: {
-        node: {
-            normal: {
-                fill: '#ffffff',
-                stroke: '#9ca3af',
-                strokeWidth: 1.5,
-                textColor: '#111827'
-            },
+	node: {
+	    normal: {
+		fill: '#ffffff',
+		stroke: '#94a3b8',
+		strokeWidth: 1.5,
+		textColor: '#111827'
+	    },
 
-            hover: {
-                fill: '#f8fafc',
-                stroke: '#2563eb',
-                strokeWidth: 2.5,
-                textColor: '#111827'
-            },
+	    hover: {
+		fill: '#eff6ff',
+		stroke: '#3b82f6',
+		strokeWidth: 2.5,
+		textColor: '#111827'
+	    },
 
-            selected: {
-                fill: '#faf5ff',
-                stroke: '#7c3aed',
-                strokeWidth: 2.5,
-                textColor: '#111827'
-            }
-        },
+	    selected: {
+		fill: '#f5f3ff',
+		stroke: '#7c3aed',
+		strokeWidth: 3,
+		textColor: '#111827'
+	    }
+	},
 
-        edge: {
-            stroke: '#94a3b8',
-            strokeWidth: 1.5,
-            opacity: 0.8
-        },
+	edge: {
+	    stroke: '#94a3b8',
+	    strokeWidth: 1.75,
+	    opacity: 0.45
+	},
 
         panel: {
             hover: {
