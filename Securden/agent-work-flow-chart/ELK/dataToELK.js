@@ -1,4 +1,4 @@
-import { nodeDimension } from '../nodeDimensions.js';
+import { nodeDimension } from '../nodeConfig.js';
 
 export function datatoELK(nodeMap, edgeSet) {
     const children = [];
@@ -14,7 +14,8 @@ export function datatoELK(nodeMap, edgeSet) {
 	    metadata: node.metadata,
 	    width: (node.label.length < 27) ? dimension.width : (node.label.length * 10),
 	    height: dimension.height,
-	    shape: dimension.shape
+	    shape: dimension.shape,
+	    icon: dimension.icon
 	});
 
 	for (const edge of edgeSet.get(key) ?? []) {

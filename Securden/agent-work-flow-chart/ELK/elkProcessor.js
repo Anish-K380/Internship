@@ -17,7 +17,7 @@ export function graphNumbers(childrenObj, edgesObj) {
 			 'org.eclipse.elk.layered.nodePlacement.strategy': 'NETWORK_SIMPLEX',
 			 'org.eclipse.elk.layered.mergeHierarchyEdges': true,
 			 'org.eclipse.elk.mrtree.edgeRoutingMode': 'AVOID_OVERLAP',
-			 'org.eclipse.elk.spacing.edgeEdge': -0.1
+			 'org.eclipse.elk.spacing.edgeEdge': 0.0
 		       },
 	children: childrenObj,
 	edges: edgesObj

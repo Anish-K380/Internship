@@ -10,7 +10,8 @@ export function adaptForD3(elkData) {
 
         width: node.width,
         height: node.height,
-        shape: node.shape
+        shape: node.shape,
+	icon: node.icon
     }));
 
     const edges = elkData.edges.map(edge => {

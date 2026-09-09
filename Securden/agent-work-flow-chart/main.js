@@ -19,8 +19,6 @@ const [nodeData, edgeData] = prepData(
 
 const elkData = await elkfy(nodeData, edgeData);
 
-console.dir(elkData, {depth: null});
-
 fs.writeFileSync(
     './pages/graph.json',
     JSON.stringify(elkData, null, 2)

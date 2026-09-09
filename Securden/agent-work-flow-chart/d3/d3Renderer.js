@@ -4,6 +4,7 @@ import { zoom, zoomIdentity } from 'd3-zoom';
 import { displayConfig } from '../viewer/display_config.js';
 
 export function renderGraph(graphData, selector) {
+
     const {
         width,
         height,
@@ -471,6 +472,18 @@ export function renderGraph(graphData, selector) {
                     normalStyle.strokeWidth
                 );
         }
+	console.log(node.type, node.icon);
+	if (node.icon) {
+	    group
+		.append('image')
+		.attr('class', 'node-icon')
+		.attr('href', node.icon)
+		.attr('width', 32)
+		.attr('height', 32)
+		.attr('x', 10)
+		.attr('y', (node.height - 24) / 2);
+	    console.log(node.type, node.icon);
+	}
 
         renderNodeFields(
             group,

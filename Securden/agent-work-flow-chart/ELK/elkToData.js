@@ -11,6 +11,7 @@ export function graphData(layout) {
             height: child.height,
             width: child.width,
             shape: child.shape,
+	    icon: child.icon,
             x: child.x,
             y: child.y
         });
