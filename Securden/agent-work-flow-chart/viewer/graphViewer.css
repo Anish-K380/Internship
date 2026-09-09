@@ -35,7 +35,7 @@ body {
 
     overflow-wrap: anywhere;
 
-    pointer-events = none;
+    pointer-events: auto;
 }
 
 .node-info-panel .field {
@@ -69,12 +69,41 @@ body {
 
 .hover-panel {
     opacity: 0.96;
+    pointer-events: none;
 }
 
 .click-panel {
     border-color: #c4b5fd;
+    pointer-events: auto;
 
     box-shadow:
         0 8px 24px rgba(0, 0, 0, 0.12),
         0 2px 6px rgba(0, 0, 0, 0.08);
+}
+.panel-controls {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.panel-button {
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #ffffff;
+    padding: 2px 8px;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.panel-button:hover {
+    background: #f3f4f6;
+}
+
+.panel-fullscreen {
+    font-size: 28px;
+    padding: 6px 12px;
+    line-height: 1;
+    cursor: pointer;
 }

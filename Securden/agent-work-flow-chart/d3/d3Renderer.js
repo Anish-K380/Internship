@@ -99,6 +99,7 @@ export function renderGraph(graphData, selector) {
     let selectedNode = null;
     let clickPanel = null;
     let hoveredNode = null;
+    let clickPanelFullscreen = false;
 
     // --------------------------------------------------
     // Helpers
@@ -226,70 +227,97 @@ export function renderGraph(graphData, selector) {
     }
 
     function createPanel(node, fields, className, panelConfig) {
-        const foreignObject = viewport
-            .append('foreignObject')
-            .attr('class', className)
-            .attr('width', panelConfig.width)
-            .attr('height', 1);
+	const foreignObject = viewport
+              .append('foreignObject')
+              .attr('class', className)
+              .attr('width', panelConfig.width)
+              .attr('height', 1);
 
-        const panel = foreignObject
-            .append('xhtml:div')
-            .attr(
-                'class',
-                `node-info-panel ${className}`
-            )
-            .style('box-sizing', 'border-box')
-            .style(
-                'width',
-                `${panelConfig.width}px`
-            )
-            .style(
-                'padding',
-                `${panelConfig.padding}px`
-            )
-            .style('height', 'auto')
-            .style('overflow', 'visible');
+	const panel = foreignObject
+              .append('xhtml:div')
+              .attr(
+		  'class',
+		  `node-info-panel ${className}`
+              )
+              .style('box-sizing', 'border-box')
+              .style(
+		  'width',
+		  `${panelConfig.width}px`
+              )
+              .style(
+		  'padding',
+		  `${panelConfig.padding}px`
+              )
+              .style('height', 'auto')
+              .style('overflow', 'visible');
 
-        for (const field of fields) {
+	panel.on('click', event => {
+	    event.stopPropogation();
+	});
+
+	// --------------------------------------------------
+	// Panel buttons
+	// --------------------------------------------------
+
+	if (className === 'click-panel') {
+            const controls = panel
+		  .append('div')
+		  .attr('class', 'panel-controls');
+
+            controls
+		.append('button')
+		.attr('class', 'panel-button panel-fullscreen')
+		.attr('type', 'button')
+		.text('⛶')
+		.on('click', event => {
+                    event.stopPropagation();
+                    toggleClickPanelFullscreen();
+		});
+	}
+
+	// --------------------------------------------------
+	// Fields
+	// --------------------------------------------------
+
+	for (const field of fields) {
             const value = getFieldValue(node, field);
 
             if (
-                value === undefined ||
-                value === null
+		value === undefined ||
+		    value === null
             ) {
-                continue;
+		continue;
             }
 
             const fieldElement = panel
-                .append('div')
-                .attr('class', 'field');
+		  .append('div')
+		  .attr('class', 'field');
 
             fieldElement
-                .append('span')
-                .attr(
+		.append('span')
+		.attr(
                     'class',
                     `field-label field-${field}`
-                )
-                .text(`${getFieldLabel(field)}: `);
+		)
+		.text(`${getFieldLabel(field)}: `);
 
             fieldElement
-                .append('span')
-                .attr('class', 'field-value')
-                .text(formatValue(value));
-        }
+		.append('span')
+		.attr('class', 'field-value')
+		.text(formatValue(value));
+	}
 
-        // Force the browser to calculate the natural size.
-        const panelNode = panel.node();
+	const panelNode = panel.node();
 
-        const actualHeight =
-            panelNode.scrollHeight;
+	const actualHeight =
+              panelNode.scrollHeight;
 
-        foreignObject.attr(
+	foreignObject.attr(
             'height',
             actualHeight + 2
-        );
+	);
 
-        return foreignObject;
+	return foreignObject;
     }
 
     function positionPanel(panel, node, panelConfig) {
@@ -333,6 +361,8 @@ export function renderGraph(graphData, selector) {
             clickPanel = null;
         }
 
+	clickPanelFullscreen = false;
+
         selectedNode = null;
 
         const normalStyle =
@@ -346,6 +376,70 @@ export function renderGraph(graphData, selector) {
                 'stroke-width',
                 normalStyle.strokeWidth
             );
+    }
+
+    function toggleClickPanelFullscreen() {
+	if (!clickPanel || !selectedNode) {
+            return;
+	}
+
+	clickPanelFullscreen = !clickPanelFullscreen;
+
+	if (clickPanelFullscreen) {
+            const scale = 1 / currentTransform.k;
+
+            const containerNode = container.node();
+
+            const containerWidth =
+		  containerNode.clientWidth;
+
+            const containerHeight =
+		  containerNode.clientHeight;
+
+            const fullscreenWidth =
+		  containerWidth * currentTransform.k;
+
+            const fullscreenHeight =
+		  containerHeight * currentTransform.k;
+
+            const x =
+		  -currentTransform.x / currentTransform.k;
+
+            const y =
+		  -currentTransform.y / currentTransform.k;
+
+            clickPanel
+		.attr('width', fullscreenWidth)
+		.attr('height', fullscreenHeight)
+		.select('div')
+		.style(
+                    'width',
+                    `${fullscreenWidth}px`
+		);
+
+            clickPanel.attr(
+		'transform',
+		`translate(${x}, ${y}) scale(${scale})`
+            );
+	} else {
+            clickPanel
+		.attr(
+                    'width',
+                    displayConfig.style.panel.click.width
+		)
+		.attr('height', 1)
+		.select('div')
+		.style(
+                    'width',
+                    `${displayConfig.style.panel.click.width}px`
+		);
+
+            positionPanel(
+		clickPanel,
+		selectedNode,
+		displayConfig.style.panel.click
+            );
+	}
     }
 
     // --------------------------------------------------
@@ -574,13 +668,29 @@ export function renderGraph(graphData, selector) {
                 );
             }
 
-            if (clickPanel && selectedNode) {
-                positionPanel(
-                    clickPanel,
-                    selectedNode,
-                    displayConfig.style.panel.click
-                );
-            }
+	    if (clickPanel && selectedNode) {
+		if (clickPanelFullscreen) {
+		    const scale = 1 / currentTransform.k;
+
+		    const x =
+			  -currentTransform.x / currentTransform.k;
+
+		    const y =
+			  -currentTransform.y / currentTransform.k;
+
+		    clickPanel.attr(
+			'transform',
+			`translate(${x}, ${y}) scale(${scale})`
+		    );
+
+		} else {
+		    positionPanel(
+			clickPanel,
+			selectedNode,
+			displayConfig.style.panel.click
+		    );
+		}
+	    }
         });
 
     svg.call(zoomBehavior);
