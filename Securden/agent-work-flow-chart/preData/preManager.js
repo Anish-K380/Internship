@@ -8,5 +8,5 @@ export function prepData(objectID, nodeJSON, linkJSON) {
     const prepEdges = makeEdges(linkJSON);
     const prepNodes = graphObject(objectID, allNodes, prepEdges);
 
-    return { prepNodes, prepEdges };
+    return [prepNodes, prepEdges];
 }

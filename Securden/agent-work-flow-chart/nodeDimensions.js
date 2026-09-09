@@ -1,25 +1,7 @@
 export const nodeDimension = {
-    agent: {
-	height: 50,
-	width: 50,
-	shape: 'rect'
-    },
-
-    workspace: {
-	height: 60,
-	width: 60,
-	shape: 'diamond'
-    },
-
-    tool: {
-	height: 40,
-	width: 40,
-	shape: 'circle'
-    },
-
-    access_identity: {
-	height: 40,
-	width: 40,
-	shape: 'triangle'
-    }
-}
+  workspace: { width: 250, height: 86, shape: "diamond" },
+  agent: { width: 250, height: 92, shape: "rounded-rect" },
+  access_identity: { width: 220, height: 78, shape: "triangle" },
+  tool: { width: 220, height: 78, shape: "circle" },
+  default: { width: 220, height: 78, shape: "rounded-rect" }
+};

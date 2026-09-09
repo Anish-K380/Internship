@@ -1,0 +1,80 @@
+html,
+body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+#graph {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.node-info-panel {
+    box-sizing: border-box;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 30px;
+    line-height: 1.4;
+
+    background: rgba(255, 255, 255, 0.97);
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.08),
+        0 1px 3px rgba(0, 0, 0, 0.06);
+
+    color: #2563eb;
+
+    overflow-wrap: anywhere;
+
+    pointer-events = none;
+}
+
+.node-info-panel .field {
+    margin-bottom: 8px;
+}
+
+.node-info-panel .field:last-child {
+    margin-bottom: 0;
+}
+
+.node-info-panel .field-label {
+    font-weight: 600;
+    color: #2563eb;
+}
+
+.node-info-panel .field-label.field-type {
+    color: #7c3aed;
+}
+
+.node-info-panel .field-label.field-id {
+    color: #059669;
+}
+
+.node-info-panel .field-label.field-metadata {
+    color: #d97706;
+}
+
+.node-info-panel .field-value {
+    color: #111827;
+}
+
+.hover-panel {
+    opacity: 0.96;
+}
+
+.click-panel {
+    border-color: #c4b5fd;
+
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.12),
+        0 2px 6px rgba(0, 0, 0, 0.08);
+}
