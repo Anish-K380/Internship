@@ -16,12 +16,3 @@ const [nodeData, edgeData] = prepData(
     objects,
     links
 );
-
-const elkData = await elkfy(nodeData, edgeData);
-
-fs.writeFileSync(
-    './pages/graph.json',
-    JSON.stringify(elkData, null, 2)
-);
-
-console.log('Graph data written to pages/graph.json');
