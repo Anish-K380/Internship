@@ -23,14 +23,17 @@ export function renderGraph(graphData, selector) {
     let selectedNode = null;
     let hoveredNode = null;
 
-    let metadataPanel = null;
-    let resizeHandle = null;
+    let hoverMetadataPanel = null;
+    let clickMetadataPanel = null;
+    let clickResizeHandle = null;
 
     let currentTransform = zoomIdentity;
 
     let onUndo = null;
     let onRedo = null;
     let onReset = null;
+
+    let isDragging = false;
 
     function setOnUndo(callback) {
 	onUndo = callback;
@@ -383,76 +386,117 @@ export function renderGraph(graphData, selector) {
         // Hover
         // --------------------------------------------------
 
-        group
-            .on(
-                'mouseenter',
-                function(event, currentNode) {
+	group
+	    .on(
+		'mouseenter',
+		function(event, currentNode) {
 
-                    hoveredNode = currentNode;
+		    const node =
+			  nodeById.get(currentNode.id);
 
-                    if (selectedNode !== currentNode) {
+		    hoveredNode = node;
 
-                        select(this)
-                            .select('.node-shape')
-                            .attr('stroke',hoverNodeStyle.stroke)
-                            .attr('stroke-width',hoverNodeStyle.strokeWidth);
-                    }
-                }
-            );
+		    if (selectedNode !== node) {
 
+			select(this)
+			    .select('.node-shape')
+			    .attr(
+				'stroke',
+				hoverNodeStyle.stroke
+			    )
+			    .attr(
+				'stroke-width',
+				hoverNodeStyle.strokeWidth
+			    );
+		    }
 
-        group
-            .on(
-                'mouseleave',
-                function(event, currentNode) {
+		    showHoverMetadataPanel(node);
+		}
+	    )
 
-                    if (selectedNode !== currentNode) {
+	group
+	    .on(
+		'mouseleave',
+		function(event, currentNode) {
 
-                        select(this)
-                            .select('.node-shape')
-                            .attr('stroke', normalNodeStyle.stroke)
-                            .attr('stroke-width', normalNodeStyle.strokeWidth);
-                    }
+		    const node =
+			  nodeById.get(currentNode.id);
 
-                    if (hoveredNode === currentNode) {
+		    if (selectedNode !== node) {
 
-                        hoveredNode = null;
-                    }
-                }
-            );
+			select(this)
+			    .select('.node-shape')
+			    .attr(
+				'stroke',
+				normalNodeStyle.stroke
+			    )
+			    .attr(
+				'stroke-width',
+				normalNodeStyle.strokeWidth
+			    );
+		    }
+
+		    if (hoveredNode === node) {
+
+			hoveredNode = null;
+		    }
+
+		    hideHoverMetadataPanel();
+		}
+	    )
 
         // --------------------------------------------------
         // Selection
         // --------------------------------------------------
 
         group
-            .on(
-                'click',
-                function(event, currentNode) {
+	    .on(
+		'click',
+		function(event, currentNode) {
 
-                    event.stopPropagation();
+		    event.stopPropagation();
 
-                    if (selectedNode) {
-                        const previous = nodeGroupById.get(selectedNode.id);
+		    const node =
+			  nodeById.get(currentNode.id);
 
-                        if (previous) {
-                            previous
-                                .select('.node-shape')
-                                .attr('stroke', normalNodeStyle.stroke)
-                                .attr('stroke-width', normalNodeStyle.strokeWidth);
-                        }
-                    }
+		    if (selectedNode) {
 
-                    selectedNode = currentNode;
+			const previous =
+			      nodeGroupById.get(selectedNode.id);
 
-                    select(this)
-                        .select('.node-shape')
-                        .attr('stroke', selectedNodeStyle.stroke)
-                        .attr('stroke-width', selectedNodeStyle.strokeWidth);
+			if (previous) {
 
-                    showMetadataPanel(currentNode, this);
-                }
-            );
+			    previous
+				.select('.node-shape')
+				.attr(
+				    'stroke',
+				    normalNodeStyle.stroke
+				)
+				.attr(
+				    'stroke-width',
+				    normalNodeStyle.strokeWidth
+				);
+			}
+		    }
+
+		    selectedNode = node;
+
+		    select(this)
+			.select('.node-shape')
+			.attr(
+			    'stroke',
+			    selectedNodeStyle.stroke
+			)
+			.attr(
+			    'stroke-width',
+			    selectedNodeStyle.strokeWidth
+			);
+
+		    hideHoverMetadataPanel();
+
+		    showClickMetadataPanel(node);
+		}
+	    );
 
         // --------------------------------------------------
         // Drag
@@ -461,14 +505,26 @@ export function renderGraph(graphData, selector) {
 	group.call(
 	    drag()
 		.on('start', function(event, currentNode) {
+		    if (hoverMetadataPanel) {
+			hoverMetadataPanel.panel.remove();
+			hoverMetadataPanel = null;
+			isDragging = true;
+		    }
 
 		    const node = nodeById.get(currentNode.id);
+
+		    if (selectedNode && selectedNode.id === node.id) {
+			clickMetadataPanel.remove();
+			clickMetadataPanel = null;
+			selectedNode = null;
+		    }
 
 		    node._dragStartX = node.x;
 		    node._dragStartY = node.y;
 		})
 
 		.on('drag', function(event, currentNode) {
+		    isDragging = true;
 
 		    const node = nodeById.get(currentNode.id);
 
@@ -502,6 +558,8 @@ export function renderGraph(graphData, selector) {
 			);
 		    }
 
+		    isDragging = false;
+
 		    delete node._dragStartX;
 		    delete node._dragStartY;
 		})
@@ -522,147 +580,226 @@ export function renderGraph(graphData, selector) {
     // Metadata panel
     // ==================================================
 
-    function showMetadataPanel(node, element) {
+    function createMetadataPanel(node, className) {
 
-        if (metadataPanel) {
-            metadataPanel.remove();
-        }
+	const panelWidth = 500;
+	const panelHeight = 700;
 
-        if (resizeHandle) {
-            resizeHandle.remove();
-        }
+	const gap = 16;
 
-        let panelWidth = 500;
-        let panelHeight = 700;
+	const left =
+              node.x +
+              node.width +
+              gap;
 
-        const gap = 16;
+	const top = node.y;
 
-        const left = node.x + node.width + gap;
+	const panel =
+              viewport
+              .append('foreignObject')
+              .attr('class', className)
+              .attr('x', left)
+              .attr('y', top)
+              .attr('width', panelWidth)
+              .attr('height', panelHeight);
 
-        const top = node.y;
-
-        // --------------------------------------------------
-        // Panel
-        // --------------------------------------------------
-
-        metadataPanel =
-            viewport
-            .append('foreignObject')
-            .attr('class', 'metadata-panel')
-            .attr('x', left)
-            .attr('y', top)
-            .attr('width', panelWidth)
-            .attr('height',panelHeight);
-
-        // --------------------------------------------------
-        // Content
-        // --------------------------------------------------
-
-        const panelContent =
-              metadataPanel
+	const panelContent =
+              panel
               .append('xhtml:div')
               .attr('class', 'metadata-panel-content');
 
-        panelContent.on(
+	panelContent.on(
             'wheel',
             function(event) {
-                event.stopPropagation();
+		event.stopPropagation();
             }
-        );
+	);
 
-        // --------------------------------------------------
-        // Metadata
-        // --------------------------------------------------
-
-        const fields = [
+	const fields = [
             ['ID', node.id],
             ['Label', node.label],
             ['Type', node.type],
             ['Metadata', node.metadata]
-        ];
+	];
 
-        for (const [key, value] of fields) {
+	for (const [key, value] of fields) {
 
             const row =
-                  panelContent
-                  .append('div')
-                  .attr('class','metadata-row');
+		  panelContent
+		  .append('div')
+		  .attr('class', 'metadata-row');
 
             row
-                .append('div')
-                .attr('class', 'metadata-key')
-                .text(key);
+		.append('div')
+		.attr('class', 'metadata-key')
+		.text(key);
 
             row
-                .append('div')
-                .attr('class', 'metadata-value')
-                .text(key === 'Metadata' ? JSON.stringify(value, null, 2) : String(value ?? ''));
-        }
+		.append('div')
+		.attr('class', 'metadata-value')
+		.text(
+                    key === 'Metadata'
+			? JSON.stringify(value, null, 2)
+			: String(value ?? '')
+		);
+	}
 
-        // --------------------------------------------------
-        // Resize handle
-        // --------------------------------------------------
+	return {
+            panel,
+            panelContent,
+            left,
+            top,
+            width: panelWidth,
+            height: panelHeight
+	};
+    }
 
-        resizeHandle =
+    function showHoverMetadataPanel(node) {
+	if (isDragging) {
+	    return;
+	}
+
+	if (selectedNode && selectedNode.id === node.id) {
+	    return;
+	}
+
+	if (hoverMetadataPanel) {
+            hoverMetadataPanel.panel.remove();
+	}
+
+	hoverMetadataPanel =
+            createMetadataPanel(
+		node,
+		'metadata-panel hover-panel'
+            );
+    }
+
+    function hideHoverMetadataPanel() {
+
+	if (hoverMetadataPanel) {
+            hoverMetadataPanel.panel.remove();
+            hoverMetadataPanel = null;
+	}
+    }
+
+    function showClickMetadataPanel(node) {
+
+	if (clickMetadataPanel) {
+            clickMetadataPanel.remove();
+	}
+
+	if (clickResizeHandle) {
+            clickResizeHandle.remove();
+	}
+
+	const panelState =
+              createMetadataPanel(
+		  node,
+		  'metadata-panel click-panel'
+              );
+
+	clickMetadataPanel =
+            panelState.panel;
+
+	let panelWidth = panelState.width;
+	let panelHeight = panelState.height;
+
+	const left = panelState.left;
+	const top = panelState.top;
+
+	clickResizeHandle =
             viewport
             .append('rect')
             .attr('class', 'metadata-resize-handle')
-            .attr('x', left + panelWidth - 18)
-            .attr('y', top + panelHeight - 18)
+            .attr(
+		'x',
+		left + panelWidth - 18
+            )
+            .attr(
+		'y',
+		top + panelHeight - 18
+            )
             .attr('width', 18)
-            .attr('height',18)
-            .attr('cursor','nwse-resize');
+            .attr('height', 18)
+            .attr('cursor', 'nwse-resize');
 
-        // --------------------------------------------------
-        // Resize
-        // --------------------------------------------------
+	let startMouseX;
+	let startMouseY;
 
-        let startMouseX;
-        let startMouseY;
+	let startWidth;
+	let startHeight;
 
-        let startWidth;
-        let startHeight;
-
-        resizeHandle.call(
+	clickResizeHandle.call(
             drag()
-                .on('start', function(event) {
+		.on('start', function(event) {
 
                     event
-                        .sourceEvent
-                        .stopPropagation();
+			.sourceEvent
+			.stopPropagation();
 
-                    [startMouseX, startMouseY] = pointer(event, viewport.node());
+                    [
+			startMouseX,
+			startMouseY
+                    ] =
+			pointer(
+                            event,
+                            viewport.node()
+			);
 
                     startWidth = panelWidth;
+                    startHeight = panelHeight;
+		})
 
-                    startHeight =panelHeight;
-                }
-                   )
+		.on('drag', function(event) {
 
-                .on(
-                    'drag',
-                    function(event) {
+                    event
+			.sourceEvent
+			.stopPropagation();
 
-                        event
-                            .sourceEvent
-                            .stopPropagation();
+                    const [
+			mouseX,
+			mouseY
+                    ] =
+			  pointer(
+                              event,
+                              viewport.node()
+			  );
 
-                        const [mouseX, mouseY] = pointer(event, viewport.node());
+                    panelWidth =
+			Math.max(
+                            250,
+                            startWidth +
+				(mouseX - startMouseX)
+			);
 
-                        panelWidth = Math.max(250, startWidth + (mouseX - startMouseX));
+                    panelHeight =
+			Math.max(
+                            150,
+                            startHeight +
+				(mouseY - startMouseY)
+			);
 
-                        panelHeight = Math.max(150, startHeight + (mouseY - startMouseY));
+                    clickMetadataPanel
+			.attr(
+                            'width',
+                            panelWidth
+			)
+			.attr(
+                            'height',
+                            panelHeight
+			);
 
-                        metadataPanel
-                            .attr('width', panelWidth)
-                            .attr('height', panelHeight);
-
-                        resizeHandle
-                            .attr('x', left + panelWidth - 16)
-                            .attr('y', top + panelHeight - 16);
-                    }
-                )
-        );
+                    clickResizeHandle
+			.attr(
+                            'x',
+                            left + panelWidth - 16
+			)
+			.attr(
+                            'y',
+                            top + panelHeight - 16
+			);
+		})
+	);
     }
 
     // ==================================================
@@ -687,16 +824,17 @@ export function renderGraph(graphData, selector) {
 
         selectedNode = null;
 
-        if (metadataPanel) {
+        if (clickMetadataPanel) {
 
-            metadataPanel.remove();
-            metadataPanel = null;
+            clickMetadataPanel.remove();
+            clickMetadataPanel = null;
+	    selectedNode = null;
         }
 
-        if (resizeHandle) {
+        if (clickResizeHandle) {
 
-            resizeHandle.remove();
-            resizeHandle = null;
+            clickResizeHandle.remove();
+            clickResizeHandle = null;
         }
     }
 	  );
