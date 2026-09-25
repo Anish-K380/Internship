@@ -2,22 +2,22 @@ export class PlotInfo {
     spaceBetweenLevels = 400;
     levelAlign = true;
     minimumVerticalSpaceNonGroupedNodes = 50;
-    groupOtherSpace = 50;
 
     minimumNodesForGroup = 5;
     verticalAlignNodes = true;
     horizontalSpaceBetweenNodes = 150;
     nodeEdgeSpace = 100;
 
-    rowsColumnsPerGroupMethod = 'fixed';
-    fixRowsColumns = 'columns';
-    fixRowsColumnsNumber = 6;
+    rowsColumnsPerGroupMethod = 'ratio'; //['fixed', 'ratio']
 
-    rowRatioNumber = 1;
-    columnRatioNumber = 1;
+    fixRowsColumns = 'rows'; //['rows, 'columns']
+    fixRowsColumnsNumber = 7;
 
-    edgeArrival = 'top';
-    edgeAttachmentToNode = 'left';
+    rowRatioNumber = 4;
+    columnRatioNumber = 3;
+
+    edgeArrival = 'top'; //['top', 'bottom']
+    edgeAttachmentToNode = 'left'; //['top', 'right', 'bottom', 'left']
 }
 
 export const layoutInfo = new PlotInfo();
