@@ -12,9 +12,9 @@ make changes in [layout config](agent-work-flow-chart/myLayout/js/layout_config.
 ### Intro
 There are some terminologies that I've used for this package you can read about for a better understanding. Most of these configs only work for the initial render.
 
-Group: A cluster of children nodes
-Level:
-Row-edge: The edge that goes along with the row
+Group: A cluster of children nodes.
+Level: A collection of sibling nodes or one node if said node has no siblings.
+Row-edge: The edge that goes along with the row.
 
 ### 1. spaceBetweenLevels
 This is to increase space between the parent and child nodes.
