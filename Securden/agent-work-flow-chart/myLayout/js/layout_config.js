@@ -1,4 +1,6 @@
 export class PlotInfo {
+    verticalArrangement = false;
+
     spaceBetweenLevels = 400;
     levelAlign = true;
     minimumVerticalSpaceNonGroupedNodes = 50;
