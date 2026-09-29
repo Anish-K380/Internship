@@ -24,7 +24,7 @@ def verify_timeout(duration):
 
 def verify_user_input(ip_address, port, timeout):
     fields = ('source', 'IP', 'port', 'timeout', 'verdict', 'message')
-    values = ['input_verification', ip_address, port, timeout]
+    values = ['verification/user_input', ip_address, port, timeout]
     timeout_check, timeout_message = verify_timeout(timeout)
     if not timeout_check:
         message = timeout_message
@@ -41,3 +41,6 @@ def verify_user_input(ip_address, port, timeout):
     values.append(message)
     add_to_log(fields, values)
     return False
+
+def is_junos_router(ssh_client):
+    pass

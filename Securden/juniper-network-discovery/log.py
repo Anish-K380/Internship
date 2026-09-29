@@ -1,8 +1,13 @@
 from ast import literal_eval
+from datetime import datetime
 
 def add_to_log(fields, values): #fields and values are iterables, values have the value of the field.
     line = list()
     no_of_fields = len(fields)
+    current_time = str(datetime.now())
+    line.append(str((4, len(current_time))))
+    line.append('time')
+    line.append(current_time)
     for i in range(no_of_fields):
         field = fields[i]
         value = values[i]
@@ -22,6 +27,10 @@ def view_log():
     index = 0
 
     while index < len(log_text):
+        if log_text[index] != '[':
+            index += 1
+            continue
+
         row_start = index
         while log_text[index] != ']':index += 1
         index += 1
@@ -37,7 +46,7 @@ def view_log():
             index += field_length
             print(log_text[index:index + value_length], end = '')
             index += value_length
-            print(' ', end = '')
+            print('|', end = '')
         print()
 
 filename = 'juniper_discovery.log'
