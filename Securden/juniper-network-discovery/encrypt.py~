@@ -1,5 +1,0 @@
-import crypt
-
-def sha512(plaintext):
-    hash_text = crypt.crypt(plaintext, crypt.mksalt(crypt.METHOD_SHA512))
-    return hash_text
