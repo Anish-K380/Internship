@@ -16,7 +16,7 @@ def netconf_with_username_password(username, password, hostname, port, timeout):
         make_log(username, hostname, port, timeout, 'PASS', 'Connection successful.')
         return netconf_manager
     except Exception as e:
-        make_log(username, hostname, port, timeout, 'FAIL', e)
+        make_log(username, hostname, port, timeout, 'FAIL', str(e))
 
     return None
 

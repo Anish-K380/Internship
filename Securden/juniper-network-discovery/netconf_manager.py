@@ -13,7 +13,7 @@ class NetconfManager:
             self.manager.close_session()
             log_values = ['netconf_manager/close', self.user, self.ip, 'close connection', 'PASS', message]
         except Exception as e:
-            log_values = ['netconf_manager/close', self.user, self.ip, 'close connection', 'FAIL', e]
+            log_values = ['netconf_manager/close', self.user, self.ip, 'close connection', 'FAIL', str(e)]
 
         add_to_log(log_fields, log_values)
 
