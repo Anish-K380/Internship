@@ -43,4 +43,32 @@ def verify_user_input(ip_address, port, timeout):
     return False
 
 def is_junos_router(ssh_client):
-    pass
+    def make_log(command, verdict, message):
+        log_values = ['verification/is_junos_router', ssh_client.ip, ssh_client.user, command, verdict, message]
+        add_to_log(log_fields, log_values)
+    def verify_with_command(command, match_string, slice_start, slice_end):
+        output, error = ssh_client.execute(command)
+        if error:
+            make_log(command, 'FAIL', error)
+            ssh_client.close_connection('Encountered error while executing command.')
+            return False
+        if output[slice_start:slice_end] == match_string:
+            make_log(command, 'PASS', 'Successfully executed.')
+            return True
+        make_log(command, 'FAIL', 'Unexpected Junos output.')
+        ssh_client.close_connection('Unexpected output with given command.')
+        return False
+
+    command1 = 'show version | match family'
+    command2 = 'show version | match "Junos:"'
+
+    log_fields = ['source', 'hostname', 'username', 'commands', 'verdict', 'message']
+
+    if not verify_with_command(command1, 'junos', -6, -1):
+        return False
+
+    if not verify_with_command(command2, 'Junos:', 0, 6):
+        return False
+
+    make_log(f'{command1}/{command2}', 'PASS', 'Successfully verified.')
+    return True
