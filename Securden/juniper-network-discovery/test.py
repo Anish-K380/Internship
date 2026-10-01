@@ -30,7 +30,7 @@ nconf_port = int(nconf_port)
 timeout = input('Enter timeout:')
 timeout_valid, timeout_message = verify_timeout(timeout)
 if not timeout_valid:
-    raise error(f'timeout, {timeout_message}')
+    raise_error(f'timeout, {timeout_message}')
 timeout = float(timeout)
 
 junos_obj = JunosRouterAccounts(username, password, ip, ssh_port, nconf_port, timeout)
