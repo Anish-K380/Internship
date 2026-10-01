@@ -46,7 +46,7 @@ def view_log():
             index += field_length
             print(log_text[index:index + value_length], end = '')
             index += value_length
-            print('|', end = '')
+            print(' ||| ', end = '')
         print()
 
 filename = 'juniper_discovery.log'
